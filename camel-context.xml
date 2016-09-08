@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:pfx="http://www.pricefx.eu/schema/pfx"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       http://www.pricefx.eu/schema/pfx http://www.pricefx.eu/schema/pfx.xsd">
+
+    <import resource="refs/converters.xml"/>
+    <import resource="refs/mappers-filters.xml"/>
+    <import resource="refs/events.xml"/>
+
+    <!--Your custom routes-->
+    <import resource="refs/routes/customerRoutes.xml"/>
+    <import resource="refs/routes/PriceListRoutes.xml"/>
+
+     <import resource="refs/routes/productRoutes.xml"/>
+
+    <pfx:connection id="pricefx" uri="${pfx.url}" partition="${pfx.partition}" username="${pfx.username}" password="${pfx.password}" debug="${pfx.debug:false}"/>
+    
+    <camelContext xmlns="http://camel.apache.org/schema/spring" useMDCLogging="true" >
+        <contextScan/>
+        <routeContextRef ref="customerRoutes"/>
+       <routeContextRef ref="productRoutes"/>
+        <routeContextRef ref="priceListRoutes"/>
+
+
+
+    </camelContext>
+
+</beans>
