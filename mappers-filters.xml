@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.pricefx.eu/schema/pfx"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:pfx="http://www.pricefx.eu/schema/pfx"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xsi:schemaLocation="
+         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+         http://www.pricefx.eu/schema/pfx http://www.pricefx.eu/schema/pfx.xsd"
+             xmlns:p="http://www.springframework.org/schema/p">
+
+    <loadMapper id="customerMapper">
+        <body in="CustomerId" out="customerId"/>
+        <body in="CustomerName" out="name"/>
+        <body in="CustomerWeb" out="attribute1"/>
+
+    </loadMapper>
+
+    <loadMapper id="priceListItemMapper">
+        <body in="sku" out="product_id"/>
+        <body in="label" out="product_label"/>
+       <!-- <body in="resultPrice" out="result_price"/> -->
+       <!-- <body in="lastUpdateDate" out="modified_date"/> -->
+    </loadMapper>
+
+
+
+    <loadMapper id="productMapper">
+        <body in="product_id" out="sku" />
+        <body in="product_name" out="attribute1"/>
+        <body in="product_label" out="label"/>
+        <body in="product_family" out="attribute2"/>
+
+    </loadMapper>
+
+</beans:beans>

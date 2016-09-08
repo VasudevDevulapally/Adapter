@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:pfx="http://www.pricefx.eu/schema/pfx"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       http://www.pricefx.eu/schema/pfx http://www.pricefx.eu/schema/pfx.xsd">
+
+    <!-- value convertors beans -->
+    <bean id="stringToDate" class="net.pricefx.integration.mapper.converter.StringToDate">
+        <property name="format" value="dd.MM.yyyy" />
+    </bean>
+
+    <bean id="stringToDecimal" class="net.pricefx.integration.mapper.converter.StringToDecimal">
+        <property name="locale" value="en_GB" />
+    </bean>
+
+    <bean id="stringToNumber" class="net.pricefx.integration.mapper.converter.StringToNumber" />
+</beans>

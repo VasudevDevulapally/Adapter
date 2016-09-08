@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--event listener for outbound integration -->
+    <bean id="eventListener" class="net.pricefx.integration.route.EventListener">
+        <property name="httpPort" value="${event-listener-port}"/>
+        <property name="delay" value="10000"/>
+        <property name="eventTypeToRouteMapping">
+            <map>
+                <entry key="CALCULATION_COMPLETED_PG" value="direct:priceListApproved" />
+                <!--<entry key="CALCULATION_COMPLETED_PL" value="direct:priceListCompleted" /> -->
+            </map>
+        </property>
+    </bean>
+</beans>
+
