@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:pfx="http://www.pricefx.eu/schema/pfx"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       http://www.pricefx.eu/schema/pfx http://www.pricefx.eu/schema/pfx.xsd">
+
+    <util:list id="productHeader">
+        <value>product_id</value>              <!-- original source column: customer_id -->
+        <value>product_name</value>            <!-- original source column: customer_name -->
+        <value>product_label</value>
+        <value>product_family</value>         <!-- original source column: customer_web -->
+    </util:list>
+
+
+    <bean id="productCsvFormat" class="org.apache.camel.model.dataformat.CsvDataFormat">
+        <property name="useMaps" value="true"/>
+        <property name="header" ref="productHeader"/>
+        <property name="delimiter" value=";"/>
+        <property name="skipHeaderRecord" value="true"/>
+    </bean>
+
+    <pfx:dsLoad id="routeProducts" objectType="P" businessKeys="sku" mapper="productMapper"/>
+
+    <pfx:csv-to-list id="loadProducts" dataFormat="productCsvFormat" outputUri="direct:processProducts"/>
+
+    <routeContext id="productRoutes" xmlns="http://camel.apache.org/schema/spring">
+        <route id="productRoutes-CSV">
+            <from uri="{{products-fromUri}}"/>
+            <log message="Loading customer file ${header[CamelFileNameOnly]}" loggingLevel="INFO" logName="custom.trigger" />
+            <to uri="direct:loadProducts"/>
+            <log message="products have been saved. Total input records count : ${header.PfxTotalInputRecordsCount}"/>
+        </route>
+
+        <route id="productRoutes-processCustomers">
+            <from uri="direct:processProducts"/>
+            <to uri="routeProducts"/>
+        </route>
+    </routeContext>
+</beans>

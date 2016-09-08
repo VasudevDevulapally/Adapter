@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:pfx="http://www.pricefx.eu/schema/pfx"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       http://www.pricefx.eu/schema/pfx http://www.pricefx.eu/schema/pfx.xsd">
+
+    <util:list id="customerHeader">
+        <value>CustomerId</value>              <!-- original source column: customer_id -->
+        <value>CustomerName</value>            <!-- original source column: customer_name -->
+        <value>CustomerWeb</value>             <!-- original source column: customer_web -->
+    </util:list>
+
+    <bean id="processor" class="net.pricefx.integration.processor.ProbeProcessor" />
+
+
+    <bean id="customersCsvFormat" class="org.apache.camel.model.dataformat.CsvDataFormat">
+        <property name="useMaps" value="true"/>
+        <property name="header" ref="customerHeader"/>
+        <property name="delimiter" value=";"/>
+        <property name="skipHeaderRecord" value="true"/>
+    </bean>
+
+    <pfx:dsLoad id="routeCustomers" objectType="C" businessKeys="customerId" mapper="customerMapper"/>
+
+    <pfx:csv-to-list id="loadCustomers" dataFormat="customersCsvFormat" outputUri="direct:processCustomers"/>
+
+    <routeContext id="customerRoutes" xmlns="http://camel.apache.org/schema/spring">
+        <route id="customersRoute-CSV">
+            <from uri="{{customers-fromUri}}"/>
+
+            <log message="Loading customer file ${header[CamelFileNameOnly]}" loggingLevel="INFO" logName="custom.trigger" />
+            <to uri="direct:loadCustomers"/>
+            <log message="Customers have been saved. Total input records count : ${header.PfxTotalInputRecordsCount}"/>
+        </route>
+
+        <route id="customersRoute-processCustomers">
+            <from uri="direct:processCustomers"/>
+
+            <to id="customersRoute-PFX-customers" uri="routeCustomers"/>
+
+        </route>
+    </routeContext>
+</beans>

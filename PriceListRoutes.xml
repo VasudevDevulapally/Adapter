@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:pfx="http://www.pricefx.eu/schema/pfx"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       http://www.pricefx.eu/schema/pfx http://www.pricefx.eu/schema/pfx.xsd">
+
+
+<pfx:filter id="fetchPriceListItemsFilter"/>
+
+<bean id="fetchPriceListItems" class="net.pricefx.integration.command.pg.FetchPriceGridItems">
+    <property name="priceGridId" value="simple:body"/>
+    <property name="filter" ref="fetchPriceListItemsFilter"/>
+</bean>
+
+<pfx:list-to-csv id="storePriceListItems" outputUri="ftp://ftp.strato.com?username=nv-vitafy@numerus-veritas.eu?password=bH45#2L14K" mapper="priceListItemMapper" dataFormat="priceListItemFormat"/>
+<util:list id="priceListItemHeader">
+    <value>product_id</value>
+    <value>product_label</value>
+    <!--<value>result_price</value> -->
+    <!--<value>modified_date</value> -->
+</util:list>
+
+<bean id="priceListItemFormat" class="org.apache.camel.model.dataformat.CsvDataFormat">
+    <property name="useMaps" value="true"/>
+    <property name="header" ref="priceListItemHeader"/>
+    <property name="quoteMode" value="ALL"/>
+    <property name="delimiter" value=";"/>
+    <property name="skipHeaderRecord" value="false"/>
+</bean>
+
+<routeContext id="priceListRoutes" xmlns="http://camel.apache.org/schema/spring">
+    <route id="PriceListApprovedRoute">
+        <from uri="direct:priceListApproved" />
+
+        <setBody>
+            <simple>${body[data][id]}</simple>
+        </setBody>
+
+        <convertBodyTo type="java.lang.Long" />
+        <convertBodyTo type="java.lang.String" />
+
+        <log message="'Approved' notification received for price list '${body}'" loggingLevel="INFO"/>
+
+        <to uri="fetchPriceListItems"/>
+        <log message="Fetched ${body.size()} rows" loggingLevel="INFO"/>
+
+        <!--<process ref="probeProcessor" />-->
+        <to uri="direct:storePriceListItems"/>
+
+        <log message="Items stored" loggingLevel="INFO"/>
+
+    </route>
+</routeContext>
+</beans>
